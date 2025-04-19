@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router'
 </script>
 
 <template>
+  <!-- Background wrapper with flexbox to center the card -->
   <div style="min-height: 100vh; display: flex; justify-content: center; align-items: center">
     <v-responsive class="rounded">
       <v-app>
@@ -26,21 +27,30 @@ import { RouterLink } from 'vue-router'
                   ></v-img>
 
                   <template v-slot:title>
-                    <div class="text-center font-weight-black text-h6">Welcome to TGP</div>
+                    <div class="text-center font-weight-black text-h6">Create an Account</div>
                   </template>
 
                   <v-card-subtitle class="text-center">
-                    We never flinched in serving you the Truth
+                    Join us and experience the truth
                   </v-card-subtitle>
 
                   <v-card-text class="pt-4">
                     <v-form fast-fail @submit.prevent>
+                      <!-- Name Input -->
+                      <v-text-field
+                        label="Full Name"
+                        color="amber-darken-2"
+                        variant="solo-filled"
+                      ></v-text-field>
+
+                      <!-- Email Input -->
                       <v-text-field
                         label="Email"
                         color="amber-darken-2"
                         variant="solo-filled"
                       ></v-text-field>
 
+                      <!-- Password Input -->
                       <v-text-field
                         label="Password"
                         type="password"
@@ -48,30 +58,26 @@ import { RouterLink } from 'vue-router'
                         variant="solo-filled"
                       ></v-text-field>
 
-                      <v-btn class="mt-2" type="submit" block color="amber-darken-2" variant="flat">
-                        Login
-                      </v-btn>
+                      <!-- Confirm Password Input -->
+                      <v-text-field
+                        label="Confirm Password"
+                        type="password"
+                        color="amber-darken-2"
+                        variant="solo-filled"
+                      ></v-text-field>
 
-                      <div class="text-center my-4 text-subtitle-2">
-                        ------------------------- or continue -------------------------
-                      </div>
-                      <div class="d-flex justify-center gap-4 mb-4">
-                        <v-btn icon color="red" variant="text">
-                          <v-icon size="28">mdi-google</v-icon>
-                        </v-btn>
-                        <v-btn icon color="blue-darken-3" variant="text">
-                          <v-icon size="28">mdi-facebook</v-icon>
-                        </v-btn>
-                      </div>
+                      <!-- Register Button -->
+                      <v-btn class="mt-2" type="submit" block color="amber-darken-2" variant="flat">
+                        Register
+                      </v-btn>
                     </v-form>
                   </v-card-text>
 
-                  <!-- Sign up text -->
                   <v-row justify="center" class="mt-3">
                     <v-col class="text-center">
-                      <span>Don't have an account? </span>
-                      <RouterLink to="/register">
-                        <span class="text-primary" style="cursor: pointer">Sign up</span>
+                      <span>Already have an account? </span>
+                      <RouterLink to="/login">
+                        <span class="text-primary" style="cursor: pointer">Login</span>
                       </RouterLink>
                     </v-col>
                   </v-row>
