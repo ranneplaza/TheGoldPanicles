@@ -48,9 +48,17 @@ import { RouterLink } from 'vue-router'
                         variant="solo-filled"
                       ></v-text-field>
 
-                      <v-btn class="mt-2" type="submit" block color="amber-darken-2" variant="flat">
-                        Login
-                      </v-btn>
+                      <RouterLink to="/dashboard">
+                        <v-btn
+                          class="mt-2"
+                          type="submit"
+                          block
+                          color="amber-darken-2"
+                          variant="flat"
+                        >
+                          Login
+                        </v-btn>
+                      </RouterLink>
 
                       <div class="text-center my-4 text-subtitle-2">
                         ------------------------- or continue -------------------------
