@@ -69,15 +69,7 @@ const eventDescription = ref('')
               </v-row>
 
               <!-- Footer navigation -->
-              <v-row align="center" justify="center" class="mt-4">
-                <v-btn icon>
-                  <v-icon>mdi-chevron-left</v-icon>
-                </v-btn>
-                <span class="mx-4 font-weight-medium">{{ selectedMonth }}</span>
-                <v-btn icon>
-                  <v-icon>mdi-chevron-right</v-icon>
-                </v-btn>
-              </v-row>
+              <v-row align="center" justify="center" class="mt-4"> </v-row>
             </v-sheet>
           </v-col>
 

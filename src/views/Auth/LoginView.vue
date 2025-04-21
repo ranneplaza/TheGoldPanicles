@@ -1,13 +1,34 @@
 <script setup>
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+
+const email = ref('')
+const password = ref('')
+const router = useRouter()
+
+// Check if both fields are filled
+const isFormValid = computed(() => {
+  return email.value.trim() !== '' && password.value.trim() !== ''
+})
+
+// Handle login
+const handleLogin = () => {
+  if (isFormValid.value) {
+    // Simulated authentication logic here
+    console.log('Logging in with', email.value, password.value)
+    router.push('/dashboard') // redirect after "successful" login
+  } else {
+    alert('Please fill in both email and password.')
+  }
+}
 </script>
 
 <template>
   <div style="min-height: 100vh; display: flex; justify-content: center; align-items: center">
     <v-responsive class="rounded">
       <v-app>
-        <!-- Top bar without border -->
-        <v-app-bar color="amber-darken-2" class="px-3" flat>
+        <!-- Top bar -->
+        <v-app-bar class="px-3" flat>
           <v-spacer></v-spacer>
         </v-app-bar>
 
@@ -19,49 +40,50 @@ import { RouterLink } from 'vue-router'
                   <!-- Rounded Logo -->
                   <v-img
                     src="/img/tgp_logo.jpg"
-                    height="120"
-                    width="120"
+                    height="70"
+                    width="70"
                     class="my-4 mx-auto rounded-circle"
                     cover
                   ></v-img>
-
-                  <template v-slot:title>
-                    <div class="text-center font-weight-black text-h6">Welcome to TGP</div>
-                  </template>
 
                   <v-card-subtitle class="text-center">
                     We never flinched in serving you the Truth
                   </v-card-subtitle>
 
                   <v-card-text class="pt-4">
-                    <v-form fast-fail @submit.prevent>
+                    <v-form fast-fail @submit.prevent="handleLogin">
                       <v-text-field
+                        v-model="email"
                         label="Email"
                         color="amber-darken-2"
                         variant="solo-filled"
+                        required
                       ></v-text-field>
 
                       <v-text-field
+                        v-model="password"
                         label="Password"
                         type="password"
                         color="amber-darken-2"
                         variant="solo-filled"
+                        required
                       ></v-text-field>
 
-                      <RouterLink to="/dashboard">
-                        <v-btn
-                          class="mt-2"
-                          type="submit"
-                          block
-                          color="amber-darken-2"
-                          variant="flat"
-                        >
-                          Login
-                        </v-btn>
-                      </RouterLink>
+                      <v-btn
+                        class="mt-2"
+                        type="submit"
+                        block
+                        color="amber-darken-2"
+                        variant="flat"
+                        :disabled="!isFormValid"
+                      >
+                        Login
+                      </v-btn>
 
-                      <div class="text-center my-4 text-subtitle-2">
-                        ------------------------- or continue -------------------------
+                      <div class="d-flex align-center my-4">
+                        <v-divider class="flex-grow-1"></v-divider>
+                        <span class="mx-4 text-subtitle-2">OR</span>
+                        <v-divider class="flex-grow-1"></v-divider>
                       </div>
                       <div class="d-flex justify-center gap-4 mb-4">
                         <v-btn icon color="red" variant="text">
@@ -88,7 +110,7 @@ import { RouterLink } from 'vue-router'
             </v-row>
           </v-container>
 
-          <v-footer class="d-flex justify-center text-center" color="amber-darken-2" border app>
+          <v-footer class="d-flex justify-center text-center" border app>
             © 2025 - TGP | All Rights Reserved
           </v-footer>
         </v-main>

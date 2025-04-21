@@ -8,7 +8,7 @@ import { RouterLink } from 'vue-router'
     <v-responsive class="rounded">
       <v-app>
         <!-- Top bar without border -->
-        <v-app-bar color="amber-darken-2" class="px-3" flat>
+        <v-app-bar class="px-3" flat>
           <v-spacer></v-spacer>
         </v-app-bar>
 
@@ -20,19 +20,13 @@ import { RouterLink } from 'vue-router'
                   <!-- Rounded Logo -->
                   <v-img
                     src="/img/tgp_logo.jpg"
-                    height="120"
-                    width="120"
+                    height="70"
+                    width="70"
                     class="my-4 mx-auto rounded-circle"
                     cover
                   ></v-img>
 
-                  <template v-slot:title>
-                    <div class="text-center font-weight-black text-h6">Create an Account</div>
-                  </template>
-
-                  <v-card-subtitle class="text-center">
-                    Join us and experience the truth
-                  </v-card-subtitle>
+                  <v-card-subtitle class="text-center"> Create an Account </v-card-subtitle>
 
                   <v-card-text class="pt-4">
                     <v-form fast-fail @submit.prevent>
@@ -86,7 +80,7 @@ import { RouterLink } from 'vue-router'
             </v-row>
           </v-container>
 
-          <v-footer class="d-flex justify-center text-center" color="amber-darken-2" border app>
+          <v-footer class="d-flex justify-center text-center" border app>
             © 2025 - TGP | All Rights Reserved
           </v-footer>
         </v-main>
