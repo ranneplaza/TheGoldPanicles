@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 const currentDate = ref(new Date())
 const selectedDate = ref(null)
 const dialog = ref(false)
+const myRequestDialog = ref(false)
 
 const selectedMonth = computed(() =>
   currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' }),
@@ -13,9 +14,9 @@ const greenDays = ['1', '3', '4', '7', '25', '26', '27', '28', '29']
 const redDays = ['5', '6', '8', '11', '12', '13', '14', '15', '18', '19', '20', '21', '22']
 
 const getColor = (day) => {
-  if (greenDays.includes(day.toString())) return 'green'
-  if (redDays.includes(day.toString())) return 'red'
-  return ''
+  if (greenDays.includes(day.toString())) return 'bg-event-green'
+  if (redDays.includes(day.toString())) return 'bg-event-red'
+  return 'bg-default'
 }
 
 const calendar = computed(() => {
@@ -61,8 +62,13 @@ const openRequestForm = (day) => {
   }
 }
 
-const requestStatus = ref('denied') // can be: 'approved', 'denied', or 'pending'
+const requestStatus = ref('denied')
 const denialReason = ref('Insufficient details provided in the form.')
+
+const requestHistory = ref([
+  { date: 'April 5, 2025', status: 'denied' },
+  { date: 'April 7, 2025', status: 'approved' },
+])
 </script>
 
 <template>
@@ -85,12 +91,12 @@ const denialReason = ref('Insufficient details provided in the form.')
     </v-app-bar>
 
     <!-- Main Content -->
-    <v-main class="bg-white">
+    <v-main class="calendar-background">
       <v-container fluid>
         <v-row no-gutters>
           <!-- Calendar -->
           <v-col cols="9">
-            <v-sheet elevation="1" class="ma-4 pa-2" style="min-height: 700px">
+            <v-sheet elevation="1" class="ma-4 pa-2 calendar-sheet">
               <v-row class="text-center font-weight-bold" no-gutters>
                 <v-col
                   v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
@@ -107,8 +113,8 @@ const denialReason = ref('Insufficient details provided in the form.')
                   :key="i + '-' + j"
                   class="calendar-cell"
                   :class="[
-                    day ? `bg-${getColor(day)} text-white font-weight-bold` : 'bg-grey-lighten-2',
-                    day && getColor(day) === 'green' ? 'cursor-pointer' : '',
+                    day ? getColor(day) : 'bg-grey-lighten-3',
+                    day && getColor(day) === 'bg-event-green' ? 'cursor-pointer' : '',
                   ]"
                   @click="day && openRequestForm(day)"
                 >
@@ -132,18 +138,16 @@ const denialReason = ref('Insufficient details provided in the form.')
 
           <!-- Sidebar Buttons -->
           <v-col cols="3" class="pa-4">
-            <!-- My Request Button -->
             <v-btn
               block
               :color="
                 requestStatus === 'approved' ? 'green' : requestStatus === 'denied' ? 'red' : 'grey'
               "
               variant="outlined"
+              @click="myRequestDialog = true"
             >
               My Request
             </v-btn>
-
-            <!-- Show reason if denied -->
             <div v-if="requestStatus === 'denied'" class="mt-2 text-red">
               Reason: {{ denialReason }}
             </div>
@@ -152,13 +156,14 @@ const denialReason = ref('Insufficient details provided in the form.')
       </v-container>
     </v-main>
 
-    <!-- Dialog Form -->
+    <!-- Request Form Dialog -->
     <v-dialog v-model="dialog" max-width="600px">
       <v-card>
         <v-card-title class="text-h6">Request Form</v-card-title>
         <v-card-text>
           <v-form>
             <v-text-field label="Date" :model-value="selectedDate?.toDateString()" readonly />
+            <v-text-field label="Time" />
             <v-text-field label="Title" />
             <v-textarea label="Description" />
             <v-text-field label="Location" />
@@ -172,6 +177,37 @@ const denialReason = ref('Insufficient details provided in the form.')
       </v-card>
     </v-dialog>
 
+    <!-- My Request Status Dialog -->
+    <v-dialog v-model="myRequestDialog" max-width="500px">
+      <v-card>
+        <v-card-title>Status History</v-card-title>
+        <v-card-text>
+          <v-simple-table class="grey lighten-3">
+            <thead>
+              <tr>
+                <th>Sent request</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(entry, index) in requestHistory" :key="index">
+                <td>{{ entry.date }}</td>
+                <td>
+                  <v-icon :color="entry.status === 'approved' ? 'green' : 'red'" small>
+                    mdi-checkbox-blank-circle
+                  </v-icon>
+                </td>
+              </tr>
+            </tbody>
+          </v-simple-table>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="myRequestDialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Footer -->
     <v-footer class="d-flex justify-center text-center" border app>
       © 2025 - TGP | All Rights Reserved
@@ -180,12 +216,32 @@ const denialReason = ref('Insufficient details provided in the form.')
 </template>
 
 <style scoped>
-.bg-red {
-  background-color: #e53935 !important;
+.calendar-sheet {
+  min-height: 700px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.bg-green {
-  background-color: #43a047 !important;
+.calendar-background {
+  background: url('/public/img/favicon.png') center center no-repeat;
+  background-size: 300px;
+  background-color: #f4f4f400;
+}
+
+.bg-event-red {
+  background-color: #ffcdd2 !important;
+  color: #b71c1c !important;
+}
+
+.bg-event-green {
+  background-color: #c8e6c9 !important;
+  color: #1b5e20 !important;
+}
+
+.bg-default {
+  background-color: #f9f9f9;
+  color: #333;
 }
 
 .cursor-pointer {
@@ -200,11 +256,12 @@ const denialReason = ref('Insufficient details provided in the form.')
   justify-content: flex-start;
   padding: 8px;
   position: relative;
-  background-color: white;
+  transition: background-color 0.3s ease;
+  border-radius: 6px;
 }
 
 .calendar-day-number {
-  font-size: 1.2rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 </style>
