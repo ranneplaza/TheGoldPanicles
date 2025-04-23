@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 <script setup>
 import { ref, computed } from 'vue'
 
@@ -325,4 +323,3 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
 }
 
 </style>
->>>>>>> Stashed changes
