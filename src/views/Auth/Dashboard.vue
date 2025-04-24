@@ -1,151 +1,14 @@
-<script setup>
-import { ref, computed } from 'vue'
-import { RouterLink } from 'vue-router'
-
-// Date references
-const currentDate = ref(new Date())
-const selectedDate = ref(null)
-
-// Dialog toggles
-const dialog = ref(false)
-const myRequestDialog = ref(false)
-const showStaffers = ref(false)
-const drawer = ref(false)
-const fileInput = ref(null)
-
-// Request status (used for button color)
-const requestStatus = ref('approved')
-
-// Color-coded days
-const greenDays = ['1', '3', '4', '7', '25', '26', '27', '28', '29']
-const redDays = ['5', '6', '8', '11', '12', '13', '14', '15', '18', '19', '20', '21', '22']
-const whiteDays = ['10', '16', '23', '30']
-
-// Computed month display
-const selectedMonth = computed(() =>
-  currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' }),
-)
-
-// Assign color classes based on the day
-const getColor = (day) => {
-  if (whiteDays.includes(day.toString())) return 'bg-event-white'
-  if (greenDays.includes(day.toString())) return 'bg-event-green'
-  if (redDays.includes(day.toString())) return 'bg-event-red'
-  return 'bg-default'
-}
-
-// Calendar grid logic
-const calendar = computed(() => {
-  const year = currentDate.value.getFullYear()
-  const month = currentDate.value.getMonth()
-  const firstDay = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-
-  const weeks = []
-  let week = new Array(firstDay).fill('')
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    week.push(day)
-    if (week.length === 7) {
-      weeks.push(week)
-      week = []
-    }
-  }
-
-  if (week.length) {
-    while (week.length < 7) week.push('')
-    weeks.push(week)
-  }
-
-  return weeks
-})
-
-// Month navigation
-const prevMonth = () => {
-  currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth() - 1))
-}
-const nextMonth = () => {
-  currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth() + 1))
-}
-
-// Trigger dialog if green day is clicked
-const openRequestForm = (day) => {
-  if (greenDays.includes(day.toString())) {
-    selectedDate.value = new Date(
-      currentDate.value.getFullYear(),
-      currentDate.value.getMonth(),
-      day,
-    )
-    dialog.value = true
-  }
-}
-
-// File upload handling
-const triggerFileUpload = () => {
-  fileInput.value?.click()
-}
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    console.log('File uploaded:', file.name)
-  }
-}
-
-// Form fields
-const time = ref('')
-const title = ref('')
-const description = ref('')
-
-// Request table headers
-const headers = [
-  { text: 'Event', value: 'event', align: 'start' },
-  { text: 'Date Requested', value: 'date' },
-  { text: 'Status', value: 'status' },
-]
-
-// Sample request history data
-const requestHistory = ref([
-  {
-    event: 'Interview with Artist A',
-    date: 'April 5, 2025',
-    status: 'approved',
-    reason: '',
-  },
-  {
-    event: 'Coverage for Sportsfest',
-    date: 'April 7, 2025',
-    status: 'denied',
-    reason: 'Overlapping schedule with another request',
-  },
-  {
-    event: 'Photography for Exhibit B',
-    date: 'April 9, 2025',
-    status: 'approved',
-    reason: '',
-  },
-])
-
-// Staffers availability
-const availableStaffers = ref([
-  { name: 'Annie Batumbakal', position: 'Writer' },
-  { name: 'Ruffamae Quinto', position: 'Photographer' },
-  { name: 'John Paulo Nase', position: 'Editor' },
-])
-
-const unavailableStaffers = ref([
-  { name: 'Stellvester Ajero', position: 'Videographer' },
-  { name: 'Rico Blanco', position: 'Layout Artist' },
-])
-</script>
-
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list>
         <v-list-item>
-          <v-list-item-title>Menu Item 1</v-list-item-title>
+          <v-list-item-title>Edit Profile</v-list-item-title>
         </v-list-item>
-        <RouterLink to="/login">
+        <v-list-item>
+          <v-list-item-title>Settings</v-list-item-title>
+        </v-list-item>
+        <RouterLink to="/">
           <v-list-item>
             <v-list-item-title>Logout</v-list-item-title>
           </v-list-item>
@@ -165,7 +28,7 @@ const unavailableStaffers = ref([
       </v-toolbar-title>
       <v-spacer />
       <v-btn icon @click="drawer = !drawer">
-        <v-icon>mdi-menu</v-icon>
+        <v-icon>mdi-account</v-icon>
       </v-btn>
     </v-app-bar>
 
@@ -200,7 +63,7 @@ const unavailableStaffers = ref([
                   :key="`${i}-${j}`"
                   class="calendar-cell"
                   :class="[
-                    day ? getColor(day) : 'bg-grey-lighten-3',
+                    getColor(day),
                     day && getColor(day) === 'bg-event-green' ? 'cursor-pointer' : '',
                   ]"
                   @click="day && openRequestForm(day)"
@@ -212,6 +75,15 @@ const unavailableStaffers = ref([
           </v-col>
 
           <v-col cols="4" class="pa-4">
+            <v-card class="mb-4 pa-3 text-center gold-card translucent-card" outlined>
+              <v-card-title class="text-subtitle-2 font-weight-bold"
+                >Current Date & Time</v-card-title
+              >
+              <v-card-text class="text-body-2">
+                {{ formattedDateTime }}
+              </v-card-text>
+            </v-card>
+
             <v-btn
               block
               class="black-btn"
@@ -336,21 +208,43 @@ const unavailableStaffers = ref([
             <v-text-field label="Title" v-model="title" />
             <v-textarea label="Description" v-model="description" />
 
+            <!-- Dropdown for selecting person -->
+            <v-select
+              v-model="selectedPerson"
+              :items="staffMembers"
+              item-text="name"
+              item-value="id"
+              label="Contact Person"
+              class="mt-4"
+            />
+
+            <v-text-field
+              v-if="selectedPerson"
+              label="Phone Number"
+              v-model="contactPhone"
+              class="mt-4"
+            />
+
+            <v-text-field
+              v-if="selectedPerson"
+              label="Gmail Address"
+              v-model="contactGmail"
+              class="mt-4"
+            />
+
             <div class="d-flex align-center mt-4">
-              <v-icon @click="triggerFileUpload" class="me-2 cursor-pointer" color="black">
-                mdi-paperclip
-              </v-icon>
+              <v-icon @click="triggerFileUpload" class="me-2 cursor-pointer" color="black"
+                >mdi-paperclip</v-icon
+              >
               <span
                 @click="triggerFileUpload"
                 class="cursor-pointer text-decoration-underline text-black"
+                >Attach file</span
               >
-                Attach file
-              </span>
               <input ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
             </div>
           </v-form>
         </v-card-text>
-
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
@@ -365,6 +259,141 @@ const unavailableStaffers = ref([
   </v-app>
 </template>
 
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { RouterLink } from 'vue-router'
+
+const currentDate = ref(new Date())
+const selectedDate = ref(null)
+const dialog = ref(false)
+const myRequestDialog = ref(false)
+const showStaffers = ref(false)
+const drawer = ref(false)
+const fileInput = ref(null)
+const requestStatus = ref('approved')
+
+// Live time/date logic
+const liveTime = ref(new Date())
+const formattedDateTime = computed(() =>
+  liveTime.value.toLocaleString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }),
+)
+let interval
+onMounted(() => {
+  interval = setInterval(() => (liveTime.value = new Date()), 1000)
+})
+onUnmounted(() => {
+  clearInterval(interval)
+})
+
+const greenDays = ['1', '3', '4', '7', '25', '26', '27', '28', '29']
+const redDays = ['5', '6', '8', '11', '12', '13', '14', '15', '18', '19', '20', '21', '22']
+const whiteDays = ['10', '16', '23', '30']
+
+const selectedMonth = computed(() =>
+  currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' }),
+)
+
+const getColor = (day) => {
+  if (whiteDays.includes(day.toString())) return 'bg-event-white'
+  if (greenDays.includes(day.toString())) return 'bg-event-green'
+  if (redDays.includes(day.toString())) return 'bg-event-red'
+  return 'bg-default'
+}
+
+const calendar = computed(() => {
+  const year = currentDate.value.getFullYear()
+  const month = currentDate.value.getMonth()
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const weeks = []
+  let week = new Array(firstDay).fill('')
+  for (let day = 1; day <= daysInMonth; day++) {
+    week.push(day)
+    if (week.length === 7) {
+      weeks.push(week)
+      week = []
+    }
+  }
+  if (week.length) {
+    while (week.length < 7) week.push('')
+    weeks.push(week)
+  }
+  return weeks
+})
+
+const prevMonth = () => {
+  currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth() - 1))
+}
+const nextMonth = () => {
+  currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth() + 1))
+}
+
+const openRequestForm = (day) => {
+  if (greenDays.includes(day.toString())) {
+    selectedDate.value = new Date(
+      currentDate.value.getFullYear(),
+      currentDate.value.getMonth(),
+      day,
+    )
+    dialog.value = true
+  }
+}
+
+const triggerFileUpload = () => fileInput.value?.click()
+const handleFileUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) console.log('File uploaded:', file.name)
+}
+
+const time = ref('')
+const title = ref('')
+const description = ref('')
+const selectedPerson = ref(null)
+const contactPhone = ref('')
+const contactGmail = ref('')
+const staffMembers = ref([
+  { id: 1, name: 'Annie Batumbakal' },
+  { id: 2, name: 'Ruffamae Quinto' },
+  { id: 3, name: 'John Paulo Nase' },
+])
+const headers = [
+  { text: 'Event', value: 'event', align: 'start' },
+  { text: 'Date Requested', value: 'date' },
+  { text: 'Status', value: 'status' },
+]
+
+const requestHistory = ref([
+  { event: 'Interview with Artist A', date: 'April 5, 2025', status: 'approved', reason: '' },
+  {
+    event: 'Coverage for Sportsfest',
+    date: 'April 7, 2025',
+    status: 'denied',
+    reason: 'Overlapping schedule with another request',
+  },
+  { event: 'Photography for Exhibit B', date: 'April 9, 2025', status: 'approved', reason: '' },
+])
+
+const availableStaffers = ref([
+  { name: 'Annie Batumbakal', position: 'Writer' },
+  { name: 'Ruffamae Quinto', position: 'Photographer' },
+  { name: 'John Paulo Nase', position: 'Editor' },
+])
+
+const unavailableStaffers = ref([
+  { name: 'Stellvester Ajero', position: 'Videographer' },
+  { name: 'Rico Blanco', position: 'Layout Artist' },
+])
+</script>
+
 <style scoped>
 .calendar-sheet {
   background-color: #fff3b0;
@@ -372,31 +401,25 @@ const unavailableStaffers = ref([
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-
 .bg-event-green {
   background-color: #d4edaf !important;
   color: #0b3f00 !important;
 }
-
 .bg-event-red {
   background-color: #f8caca !important;
   color: #5c0000 !important;
 }
-
 .bg-event-white {
   background-color: #ffffff !important;
   color: #000000 !important;
 }
-
 .bg-default {
   background-color: #fffbe6;
   color: #000;
 }
-
 .cursor-pointer {
   cursor: pointer;
 }
-
 .calendar-cell {
   border: 1px solid #000;
   height: 100px;
@@ -410,23 +433,19 @@ const unavailableStaffers = ref([
   background-color: #fff3b0;
   color: #000;
 }
-
 .calendar-day-number {
   font-size: 1.1rem;
   font-weight: 600;
 }
-
 .black-btn {
   background-color: #000 !important;
   color: #ffd700 !important;
   border: 1px solid #ffd700 !important;
 }
-
 .black-btn:hover {
   background-color: #ffd700 !important;
   color: #000 !important;
 }
-
 .gold-card {
   background-color: #fff3b0 !important;
   color: #000 !important;
