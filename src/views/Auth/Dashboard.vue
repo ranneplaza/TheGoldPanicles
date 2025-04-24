@@ -1,21 +1,32 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { RouterLink } from 'vue-router'
 
+// Date references
 const currentDate = ref(new Date())
 const selectedDate = ref(null)
+
+// Dialog toggles
 const dialog = ref(false)
 const myRequestDialog = ref(false)
 const showStaffers = ref(false)
 const drawer = ref(false)
+const fileInput = ref(null)
 
-const selectedMonth = computed(() =>
-  currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' }),
-)
+// Request status (used for button color)
+const requestStatus = ref('approved')
 
+// Color-coded days
 const greenDays = ['1', '3', '4', '7', '25', '26', '27', '28', '29']
 const redDays = ['5', '6', '8', '11', '12', '13', '14', '15', '18', '19', '20', '21', '22']
 const whiteDays = ['10', '16', '23', '30']
 
+// Computed month display
+const selectedMonth = computed(() =>
+  currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' }),
+)
+
+// Assign color classes based on the day
 const getColor = (day) => {
   if (whiteDays.includes(day.toString())) return 'bg-event-white'
   if (greenDays.includes(day.toString())) return 'bg-event-green'
@@ -23,6 +34,7 @@ const getColor = (day) => {
   return 'bg-default'
 }
 
+// Calendar grid logic
 const calendar = computed(() => {
   const year = currentDate.value.getFullYear()
   const month = currentDate.value.getMonth()
@@ -48,6 +60,7 @@ const calendar = computed(() => {
   return weeks
 })
 
+// Month navigation
 const prevMonth = () => {
   currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth() - 1))
 }
@@ -55,6 +68,7 @@ const nextMonth = () => {
   currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth() + 1))
 }
 
+// Trigger dialog if green day is clicked
 const openRequestForm = (day) => {
   if (greenDays.includes(day.toString())) {
     selectedDate.value = new Date(
@@ -66,14 +80,62 @@ const openRequestForm = (day) => {
   }
 }
 
-const requestStatus = ref('denied')
+// File upload handling
+const triggerFileUpload = () => {
+  fileInput.value?.click()
+}
+const handleFileUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    console.log('File uploaded:', file.name)
+  }
+}
+
+// Form fields
+const time = ref('')
+const title = ref('')
+const description = ref('')
+
+// Request table headers
+const headers = [
+  { text: 'Event', value: 'event', align: 'start' },
+  { text: 'Date Requested', value: 'date' },
+  { text: 'Status', value: 'status' },
+]
+
+// Sample request history data
 const requestHistory = ref([
-  { date: 'April 5, 2025', status: 'denied' },
-  { date: 'April 7, 2025', status: 'approved' },
+  {
+    event: 'Interview with Artist A',
+    date: 'April 5, 2025',
+    status: 'approved',
+    reason: '',
+  },
+  {
+    event: 'Coverage for Sportsfest',
+    date: 'April 7, 2025',
+    status: 'denied',
+    reason: 'Overlapping schedule with another request',
+  },
+  {
+    event: 'Photography for Exhibit B',
+    date: 'April 9, 2025',
+    status: 'approved',
+    reason: '',
+  },
 ])
 
-const availableStaffers = ref(['Annie Batumbakal', 'Ruffamae Quinto', 'John Paulo Nase'])
-const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
+// Staffers availability
+const availableStaffers = ref([
+  { name: 'Annie Batumbakal', position: 'Writer' },
+  { name: 'Ruffamae Quinto', position: 'Photographer' },
+  { name: 'John Paulo Nase', position: 'Editor' },
+])
+
+const unavailableStaffers = ref([
+  { name: 'Stellvester Ajero', position: 'Videographer' },
+  { name: 'Rico Blanco', position: 'Layout Artist' },
+])
 </script>
 
 <template>
@@ -83,7 +145,7 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
         <v-list-item>
           <v-list-item-title>Menu Item 1</v-list-item-title>
         </v-list-item>
-        <RouterLink to="/landing">
+        <RouterLink to="/login">
           <v-list-item>
             <v-list-item-title>Logout</v-list-item-title>
           </v-list-item>
@@ -108,14 +170,18 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
     </v-app-bar>
 
     <v-main class="calendar-background" style="min-height: 100vh; overflow: hidden">
-      <v-container fluid class="pa-0">
+      <v-container>
         <v-row no-gutters>
-          <v-col cols="9">
-            <v-sheet elevation="1" class="ma-2 pa-2 calendar-sheet">
+          <v-col cols="8">
+            <v-sheet elevation="1" class="ma-4 pa-4 calendar-sheet">
               <v-row align="center" justify="center" class="mb-4">
-                <v-icon class="cursor-pointer px-2" @click="prevMonth">mdi-chevron-left</v-icon>
-                <span class="mx-4 font-weight-medium">{{ selectedMonth }}</span>
-                <v-icon class="cursor-pointer px-2" @click="nextMonth">mdi-chevron-right</v-icon>
+                <v-icon class="cursor-pointer px-2 mt-6" @click="prevMonth"
+                  >mdi-chevron-left</v-icon
+                >
+                <span class="mt-6 font-weight-medium">{{ selectedMonth }}</span>
+                <v-icon class="cursor-pointer px-2 mt-6" @click="nextMonth"
+                  >mdi-chevron-right</v-icon
+                >
               </v-row>
 
               <v-row class="text-center font-weight-bold" no-gutters>
@@ -131,7 +197,7 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
               <v-row v-for="(week, i) in calendar" :key="i" class="text-center" no-gutters>
                 <v-col
                   v-for="(day, j) in week"
-                  :key="i + '-' + j"
+                  :key="`${i}-${j}`"
                   class="calendar-cell"
                   :class="[
                     day ? getColor(day) : 'bg-grey-lighten-3',
@@ -145,7 +211,7 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
             </v-sheet>
           </v-col>
 
-          <v-col cols="3" class="pa-4">
+          <v-col cols="4" class="pa-4">
             <v-btn
               block
               class="black-btn"
@@ -163,14 +229,33 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
                 >Request History</v-card-title
               >
               <v-card-text>
-                <ul class="pl-4">
-                  <li v-for="(entry, index) in requestHistory" :key="index">
-                    {{ entry.date }} -
-                    <span :style="{ color: entry.status === 'approved' ? 'green' : 'red' }">
-                      {{ entry.status }}
+                <v-data-table
+                  :headers="headers"
+                  :items="requestHistory"
+                  class="elevation-1"
+                  hide-default-footer
+                >
+                  <template #item.status="{ item }">
+                    <v-tooltip bottom v-if="item.status === 'denied'">
+                      <template #activator="{ on, attrs }">
+                        <span
+                          v-bind="attrs"
+                          v-on="on"
+                          :style="{
+                            color: item.status === 'approved' ? 'green' : 'red',
+                            cursor: 'pointer',
+                          }"
+                        >
+                          {{ item.status }}
+                        </span>
+                      </template>
+                      <span>Reason: {{ item.reason }}</span>
+                    </v-tooltip>
+                    <span v-else :style="{ color: item.status === 'approved' ? 'green' : 'grey' }">
+                      {{ item.status }}
                     </span>
-                  </li>
-                </ul>
+                  </template>
+                </v-data-table>
               </v-card-text>
             </v-card>
 
@@ -185,66 +270,55 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
             </v-btn>
 
             <v-card v-if="showStaffers" class="mt-2 gold-card translucent-card" outlined>
-              <v-card-title class="text-subtitle-1 text-success">Available</v-card-title>
+              <v-card-title class="text-subtitle-1 font-weight-bold">Staffers</v-card-title>
               <v-card-text>
-                <ul class="pl-4">
-                  <li
-                    v-for="(staff, i) in availableStaffers"
-                    :key="`a-${i}`"
-                    class="d-flex align-center justify-between mb-2"
-                  >
-                    <div class="d-flex align-center">
-                      <v-avatar size="24" class="mr-2">
-                        <v-img
-                          :src="`/img/profiles/${staff.replace(/\s+/g, '_').toLowerCase()}.jpg`"
-                          alt="profile"
-                        />
-                      </v-avatar>
-                      {{ staff }}
-                    </div>
-                    <span
-                      class="ml-2"
-                      style="
-                        width: 10px;
-                        height: 10px;
-                        background-color: green;
-                        border-radius: 50%;
-                        display: inline-block;
-                      "
-                    ></span>
-                  </li>
-                </ul>
-              </v-card-text>
-              <v-divider />
-              <v-card-title class="text-subtitle-1 text-error">Unavailable</v-card-title>
-              <v-card-text>
-                <ul class="pl-4">
-                  <li
+                <v-list density="compact">
+                  <v-list-item v-for="(staff, i) in availableStaffers" :key="'a-' + i" class="py-2">
+                    <v-list-item-avatar size="48">
+                      <v-img
+                        :src="`/img/profiles/${staff.name.replace(/\s+/g, '_').toLowerCase()}.jpg`"
+                        alt="profile"
+                      />
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-title class="font-weight-medium">{{
+                        staff.name
+                      }}</v-list-item-title>
+                      <v-list-item-subtitle class="text-caption text-grey">{{
+                        staff.position
+                      }}</v-list-item-subtitle>
+                    </v-list-item-content>
+                    <v-list-item-action>
+                      <v-icon color="green" size="12">mdi-circle</v-icon>
+                    </v-list-item-action>
+                  </v-list-item>
+
+                  <v-divider class="my-2" />
+
+                  <v-list-item
                     v-for="(staff, i) in unavailableStaffers"
-                    :key="`u-${i}`"
-                    class="d-flex align-center justify-between mb-2"
+                    :key="'u-' + i"
+                    class="py-2"
                   >
-                    <div class="d-flex align-center">
-                      <v-avatar size="24" class="mr-2">
-                        <v-img
-                          :src="`/img/profiles/${staff.replace(/\s+/g, '_').toLowerCase()}.jpg`"
-                          alt="profile"
-                        />
-                      </v-avatar>
-                      {{ staff }}
-                    </div>
-                    <span
-                      class="ml-2"
-                      style="
-                        width: 10px;
-                        height: 10px;
-                        background-color: red;
-                        border-radius: 50%;
-                        display: inline-block;
-                      "
-                    ></span>
-                  </li>
-                </ul>
+                    <v-list-item-avatar size="48">
+                      <v-img
+                        :src="`/img/profiles/${staff.name.replace(/\s+/g, '_').toLowerCase()}.jpg`"
+                        alt="profile"
+                      />
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-title class="font-weight-medium">{{
+                        staff.name
+                      }}</v-list-item-title>
+                      <v-list-item-subtitle class="text-caption text-grey">{{
+                        staff.position
+                      }}</v-list-item-subtitle>
+                    </v-list-item-content>
+                    <v-list-item-action>
+                      <v-icon color="red" size="12">mdi-circle</v-icon>
+                    </v-list-item-action>
+                  </v-list-item>
+                </v-list>
               </v-card-text>
             </v-card>
           </v-col>
@@ -252,18 +326,31 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
       </v-container>
     </v-main>
 
-    <v-dialog v-model="dialog" max-width="600px">
-      <v-card class="bg-gold text-black">
-        <v-card-title class="text-h6">Request Form</v-card-title>
+    <v-dialog v-model="dialog" max-width="400px">
+      <v-card class="rounded-lg bg-gold text-black">
+        <v-card-title class="text-h6 text-center mt-2">Request Form</v-card-title>
         <v-card-text>
           <v-form>
             <v-text-field label="Date" :model-value="selectedDate?.toDateString()" readonly />
-            <v-text-field label="Time" />
-            <v-text-field label="Title" />
-            <v-textarea label="Description" />
-            <v-text-field label="Location" />
+            <v-text-field label="Time" v-model="time" />
+            <v-text-field label="Title" v-model="title" />
+            <v-textarea label="Description" v-model="description" />
+
+            <div class="d-flex align-center mt-4">
+              <v-icon @click="triggerFileUpload" class="me-2 cursor-pointer" color="black">
+                mdi-paperclip
+              </v-icon>
+              <span
+                @click="triggerFileUpload"
+                class="cursor-pointer text-decoration-underline text-black"
+              >
+                Attach file
+              </span>
+              <input ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
+            </div>
           </v-form>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
@@ -279,14 +366,6 @@ const unavailableStaffers = ref(['Stellvester Ajero', 'Rico Blanco'])
 </template>
 
 <style scoped>
-.calendar-background {
-  background-image: url('/public/img/favicon.png');
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 300px;
-  color: #000000;
-}
-
 .calendar-sheet {
   background-color: #fff3b0;
   color: #000;
