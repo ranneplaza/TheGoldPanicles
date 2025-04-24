@@ -27,8 +27,8 @@
         />
       </v-toolbar-title>
       <v-spacer />
-      <v-btn icon @click="drawer = !drawer">
-        <v-icon>mdi-account</v-icon>
+      <v-btn icon @click="drawer = !drawer" class="bg-black rounded-circle">
+        <v-icon color="#FFD700">mdi-account</v-icon>
       </v-btn>
     </v-app-bar>
 
@@ -248,11 +248,10 @@
             <v-text-field label="Title" v-model="title" />
             <v-textarea label="Description" v-model="description" />
 
-            <!-- Dropdown for selecting person -->
             <v-select
               v-model="selectedPerson"
               :items="staffMembers"
-              item-text="name"
+              item-title="name"
               item-value="id"
               label="Contact Person"
               class="mt-4"
@@ -401,10 +400,39 @@ const selectedPerson = ref(null)
 const contactPhone = ref('')
 const contactGmail = ref('')
 const staffMembers = ref([
-  { id: 1, name: 'Annie Batumbakal' },
-  { id: 2, name: 'Ruffamae Quinto' },
-  { id: 3, name: 'John Paulo Nase' },
+  {
+    id: 1,
+    name: 'Annie Batumbakal',
+    phone: '0917-123-4567',
+    gmail: 'annie.batumbakal@gmail.com',
+  },
+  {
+    id: 2,
+    name: 'Ruffamae Quinto',
+    phone: '0928-987-6543',
+    gmail: 'ruffamae.quinto@gmail.com',
+  },
+  {
+    id: 3,
+    name: 'John Paulo Nase',
+    phone: '0906-111-2233',
+    gmail: 'jp.nase@gmail.com',
+  },
 ])
+
+import { watch } from 'vue'
+
+watch(selectedPerson, (newId) => {
+  const selected = staffMembers.value.find((s) => s.id === newId)
+  if (selected) {
+    contactPhone.value = selected.phone
+    contactGmail.value = selected.gmail
+  } else {
+    contactPhone.value = ''
+    contactGmail.value = ''
+  }
+})
+
 const headers = [
   { text: 'Event', value: 'event', align: 'start' },
   { text: 'Date Requested', value: 'date' },
