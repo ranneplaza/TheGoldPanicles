@@ -47,6 +47,46 @@
                 >
               </v-row>
 
+              <v-row class="justify-center mb-2">
+                <v-col class="d-flex align-center" cols="auto">
+                  <div
+                    style="
+                      width: 16px;
+                      height: 16px;
+                      background-color: #d4edaf;
+                      border-radius: 4px;
+                      margin-right: 8px;
+                    "
+                  ></div>
+                  <span class="text-caption">Available</span>
+                </v-col>
+                <v-col class="d-flex align-center" cols="auto">
+                  <div
+                    style="
+                      width: 16px;
+                      height: 16px;
+                      background-color: #f8caca;
+                      border-radius: 4px;
+                      margin-right: 8px;
+                    "
+                  ></div>
+                  <span class="text-caption">Unavailable</span>
+                </v-col>
+                <v-col class="d-flex align-center" cols="auto">
+                  <div
+                    style="
+                      width: 16px;
+                      height: 16px;
+                      background-color: #ffffff;
+                      border: 1px solid #ccc;
+                      border-radius: 4px;
+                      margin-right: 8px;
+                    "
+                  ></div>
+                  <span class="text-caption">Holiday</span>
+                </v-col>
+              </v-row>
+
               <v-row class="text-center font-weight-bold" no-gutters>
                 <v-col
                   v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
