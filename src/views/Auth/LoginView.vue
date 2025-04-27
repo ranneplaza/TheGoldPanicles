@@ -4,6 +4,8 @@ import { ref, computed } from 'vue'
 
 const email = ref('')
 const password = ref('')
+const showPassword = ref(false) // For toggling password visibility
+
 const router = useRouter()
 
 const isFormValid = computed(() => {
@@ -61,15 +63,19 @@ const handleLogin = () => {
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              prepend-inner-icon="mdi-email"
                             ></v-text-field>
 
                             <v-text-field
                               v-model="password"
+                              :type="showPassword ? 'text' : 'password'"
                               label="Password"
-                              type="password"
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              prepend-inner-icon="mdi-lock"
+                              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                              @click:append-inner="showPassword = !showPassword"
                             ></v-text-field>
 
                             <v-btn
@@ -130,7 +136,7 @@ const handleLogin = () => {
 
 <style scoped>
 .login-background {
-  background-image: url('/img/12.png');
+  background-image: url('/public/img/12.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

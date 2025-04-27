@@ -6,6 +6,8 @@ const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 const router = useRouter()
 
 const isFormValid = computed(() => {
@@ -70,6 +72,7 @@ const handleRegister = () => {
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              prepend-inner-icon="mdi-account"
                             ></v-text-field>
 
                             <v-text-field
@@ -78,24 +81,31 @@ const handleRegister = () => {
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              prepend-inner-icon="mdi-email"
                             ></v-text-field>
 
                             <v-text-field
                               v-model="password"
+                              :type="showPassword ? 'text' : 'password'"
                               label="Password"
-                              type="password"
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              prepend-inner-icon="mdi-lock"
+                              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                              @click:append-inner="showPassword = !showPassword"
                             ></v-text-field>
 
                             <v-text-field
                               v-model="confirmPassword"
+                              :type="showConfirmPassword ? 'text' : 'password'"
                               label="Confirm Password"
-                              type="password"
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              prepend-inner-icon="mdi-lock"
+                              :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                              @click:append-inner="showConfirmPassword = !showConfirmPassword"
                             ></v-text-field>
 
                             <v-btn
