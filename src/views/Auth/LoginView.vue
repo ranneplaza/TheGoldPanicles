@@ -1,23 +1,32 @@
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
 import { ref, computed } from 'vue'
+import { requiredValidator, emailValidator, passwordValidator } from '@/utils/validators'
 
 const email = ref('')
 const password = ref('')
-const showPassword = ref(false) // For toggling password visibility
+const showPassword = ref(false)
 
 const router = useRouter()
 
+// Rules
+const emailRules = [(v) => requiredValidator(v), (v) => emailValidator(v)]
+const passwordRules = [(v) => requiredValidator(v), (v) => passwordValidator(v)]
+
+// Form reference
+const formRef = ref(null)
+
+// Computed property to enable/disable login button
 const isFormValid = computed(() => {
-  return email.value.trim() !== '' && password.value.trim() !== ''
+  return email.value && password.value
 })
 
 const handleLogin = () => {
-  if (isFormValid.value) {
+  if (formRef.value?.validate()) {
     console.log('Logging in with', email.value, password.value)
     router.push('/dashboard')
   } else {
-    alert('Please fill in both email and password.')
+    alert('Please fill in valid credentials.')
   }
 }
 </script>
@@ -36,7 +45,7 @@ const handleLogin = () => {
             <v-row>
               <!-- Left Column -->
               <v-col cols="6">
-                <!-- Optional welcome content -->
+                <!-- Optional content -->
               </v-col>
 
               <!-- Right Column (Login Card) -->
@@ -56,13 +65,14 @@ const handleLogin = () => {
                         ></v-img>
 
                         <v-card-text class="pt-4">
-                          <v-form fast-fail @submit.prevent="handleLogin">
+                          <v-form ref="formRef" fast-fail @submit.prevent="handleLogin">
                             <v-text-field
                               v-model="email"
                               label="Email"
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              :rules="emailRules"
                               prepend-inner-icon="mdi-email"
                             ></v-text-field>
 
@@ -73,6 +83,7 @@ const handleLogin = () => {
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              :rules="passwordRules"
                               prepend-inner-icon="mdi-lock"
                               :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
                               @click:append-inner="showPassword = !showPassword"
