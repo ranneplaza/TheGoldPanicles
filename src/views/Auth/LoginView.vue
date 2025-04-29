@@ -9,18 +9,24 @@ const showPassword = ref(false)
 
 const router = useRouter()
 
-// Rules
+// Rules for Vuetify text fields
 const emailRules = [(v) => requiredValidator(v), (v) => emailValidator(v)]
 const passwordRules = [(v) => requiredValidator(v), (v) => passwordValidator(v)]
 
 // Form reference
 const formRef = ref(null)
 
-// Computed property to enable/disable login button
+// Enable button only when inputs are filled and valid
 const isFormValid = computed(() => {
-  return email.value && password.value
+  return (
+    requiredValidator(email.value) === true &&
+    emailValidator(email.value) === true &&
+    requiredValidator(password.value) === true &&
+    passwordValidator(password.value) === true
+  )
 })
 
+// Handle login
 const handleLogin = () => {
   if (formRef.value?.validate()) {
     console.log('Logging in with', email.value, password.value)
@@ -65,7 +71,12 @@ const handleLogin = () => {
                         ></v-img>
 
                         <v-card-text class="pt-4">
-                          <v-form ref="formRef" fast-fail @submit.prevent="handleLogin">
+                          <v-form
+                            ref="formRef"
+                            fast-fail
+                            lazy-validation
+                            @submit.prevent="handleLogin"
+                          >
                             <v-text-field
                               v-model="email"
                               label="Email"

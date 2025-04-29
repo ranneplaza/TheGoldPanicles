@@ -20,26 +20,22 @@ const formDataDefault = {
 
 const formData = ref({ ...formDataDefault })
 
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+
 const onSubmit = () => {
   alert('Form submitted: ' + JSON.stringify(formData.value))
 }
 
-const onFormSubmit = () => {
-  refVForm.value?.validate().then(({ valid }) => {
-    if (valid) {
-      onSubmit()
-      handleRegister()
-    }
-  })
-}
-
 const isFormValid = computed(() => {
   return (
-    formData.value.name.trim() !== '' &&
-    formData.value.email.trim() !== '' &&
-    formData.value.password.trim() !== '' &&
-    formData.value.confirmPassword.trim() !== '' &&
-    formData.value.password === formData.value.confirmPassword
+    requiredValidator(formData.value.name) === true &&
+    requiredValidator(formData.value.email) === true &&
+    emailValidator(formData.value.email) === true &&
+    requiredValidator(formData.value.password) === true &&
+    passwordValidator(formData.value.password) === true &&
+    requiredValidator(formData.value.confirmPassword) === true &&
+    confirmedValidator(formData.value.confirmPassword, formData.value.password) === true
   )
 })
 
@@ -51,13 +47,21 @@ const handleRegister = () => {
     alert('Please fill in all fields correctly.')
   }
 }
+
+const onFormSubmit = () => {
+  refVForm.value?.validate().then(({ valid }) => {
+    if (valid) {
+      onSubmit()
+      handleRegister()
+    }
+  })
+}
 </script>
 
 <template>
   <div>
     <v-responsive class="rounded">
       <v-app>
-        <!-- Top bar -->
         <v-app-bar class="px-3 transparent-bar" flat elevation="0">
           <v-spacer></v-spacer>
         </v-app-bar>
@@ -65,18 +69,13 @@ const handleRegister = () => {
         <v-main class="login-background">
           <v-container>
             <v-row>
-              <!-- Left Column -->
-              <v-col cols="6">
-                <!-- Optional welcome content -->
-              </v-col>
+              <v-col cols="6"></v-col>
 
-              <!-- Right Column (Register Card) -->
               <v-col cols="6">
                 <v-container>
                   <v-row justify="center" align="center">
                     <v-col cols="12" md="8" lg="6">
                       <v-card class="mx-auto translucent-card" width="400">
-                        <!-- Logo -->
                         <v-img
                           src="/img/tgp_logo.jpg"
                           height="70"
@@ -88,7 +87,12 @@ const handleRegister = () => {
                         <v-card-subtitle class="text-center"> Create an Account </v-card-subtitle>
 
                         <v-card-text class="pt-4">
-                          <v-form ref="refVForm" fast-fail @submit.prevent="onFormSubmit">
+                          <v-form
+                            ref="refVForm"
+                            fast-fail
+                            lazy-validation
+                            @submit.prevent="onFormSubmit"
+                          >
                             <v-text-field
                               v-model="formData.name"
                               label="Full Name"
@@ -109,39 +113,41 @@ const handleRegister = () => {
 
                             <v-text-field
                               v-model="formData.password"
+                              :type="showPassword ? 'text' : 'password'"
                               label="Password"
-                              type="password"
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                              @click:append-inner="showPassword = !showPassword"
                               :rules="[requiredValidator, passwordValidator]"
                             ></v-text-field>
 
                             <v-text-field
                               v-model="formData.confirmPassword"
+                              :type="showConfirmPassword ? 'text' : 'password'"
                               label="Confirm Password"
-                              type="password"
                               color="amber-darken-2"
                               variant="solo-filled"
                               required
+                              :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                              @click:append-inner="showConfirmPassword = !showConfirmPassword"
                               :rules="[
                                 requiredValidator,
                                 (value) => confirmedValidator(value, formData.value.password),
                               ]"
                             ></v-text-field>
 
-                            <RouterLink to="/dashboard">
-                              <v-btn
-                                class="mt-2"
-                                type="submit"
-                                block
-                                color="amber-darken-2"
-                                variant="flat"
-                                :disabled="!isFormValid"
-                              >
-                                Register
-                              </v-btn>
-                            </RouterLink>
+                            <v-btn
+                              class="mt-2"
+                              type="submit"
+                              block
+                              color="amber-darken-2"
+                              variant="flat"
+                              :disabled="!isFormValid"
+                            >
+                              Register
+                            </v-btn>
                           </v-form>
                         </v-card-text>
 
