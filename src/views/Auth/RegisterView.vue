@@ -5,8 +5,10 @@ import {
   passwordValidator,
   confirmedValidator,
 } from '@/utils/validators'
+
 import { RouterLink, useRouter } from 'vue-router'
 import { ref, computed } from 'vue'
+import { supabase, formActionDefault } from '@/utils/supabase.js'
 
 const refVForm = ref()
 const router = useRouter()
@@ -23,8 +25,34 @@ const formData = ref({ ...formDataDefault })
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
-const onSubmit = () => {
-  alert('Form submitted: ' + JSON.stringify(formData.value))
+const formAction = ref({ ...formActionDefault })
+
+const onSubmit = async () => {
+  formAction.value = { ...formActionDefault }
+  formAction.value.formProcess = true
+
+  const { data, error } = await supabase.auth.signUp({
+    email: formData.value.email,
+    password: formData.value.password,
+    options: {
+      data: {
+        fullname: formData.value.name,
+      },
+    },
+  })
+
+  if (error) {
+    console.log(error)
+    formAction.value.formErrorMessage = error.message
+    formAction.value.formStatus = error.status
+  } else if (data) {
+    console.log(data)
+    formAction.value.formSuccessMessage = 'Successfully Registered Account'
+    refVForm.value?.reset()
+    router.push('/dashboard') // Redirect only if signup succeeded
+  }
+
+  formAction.value.formProcess = false
 }
 
 const isFormValid = computed(() => {
@@ -39,26 +67,37 @@ const isFormValid = computed(() => {
   )
 })
 
-const handleRegister = () => {
-  if (isFormValid.value) {
-    console.log('Registering', formData.value.name, formData.value.email, formData.value.password)
-    router.push('/dashboard') // Redirect after successful registration
-  } else {
-    alert('Please fill in all fields correctly.')
-  }
-}
-
 const onFormSubmit = () => {
-  refVForm.value?.validate().then(({ valid }) => {
+  refVForm.value?.validate().then(async ({ valid }) => {
     if (valid) {
-      onSubmit()
-      handleRegister()
+      await onSubmit()
     }
   })
 }
 </script>
 
 <template>
+  <v-alert
+    v-if="formAction.formSuccessMessage"
+    :text="formAction.formSuccessMessage"
+    title="Success!"
+    type="success"
+    variant="tonal"
+    density="compact"
+    border="start"
+    closable
+  ></v-alert>
+  <v-alert
+    v-if="formAction.formErrorMessage"
+    :text="formAction.formErrorMessage"
+    title="Ooops!"
+    type="error"
+    variant="tonal"
+    density="compact"
+    border="start"
+    closable
+  ></v-alert>
+
   <div>
     <v-responsive class="rounded">
       <v-app>
@@ -134,7 +173,7 @@ const onFormSubmit = () => {
                               @click:append-inner="showConfirmPassword = !showConfirmPassword"
                               :rules="[
                                 requiredValidator,
-                                (value) => confirmedValidator(value, formData.value.password),
+                                (value) => confirmedValidator(value, formData.password),
                               ]"
                             ></v-text-field>
 
@@ -144,7 +183,8 @@ const onFormSubmit = () => {
                               block
                               color="amber-darken-2"
                               variant="flat"
-                              :disabled="!isFormValid"
+                              :disabled="formAction.formProcess"
+                              :loading="formAction.formProcess"
                             >
                               Register
                             </v-btn>
