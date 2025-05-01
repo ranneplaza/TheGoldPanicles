@@ -1,10 +1,15 @@
+// src/utils/supabase.js
 import { createClient } from '@supabase/supabase-js'
 
-// Create a single supabase client for interacting with your database
+// TEMPORARY DEBUG: Check if .env values are loaded
+console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL)
+console.log('Supabase Key:', import.meta.env.VITE_SUPABASE_ANON_KEY)
+
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY,
 )
+
 // Form Action utils
 export const formActionDefault = {
   formProcess: false,
