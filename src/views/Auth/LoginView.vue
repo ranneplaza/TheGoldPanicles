@@ -1,13 +1,24 @@
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { requiredValidator, emailValidator, passwordValidator } from '@/utils/validators'
+import { isAuthenticated } from '@/utils/supabase'
 
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 
 const router = useRouter()
+
+const isLoggedIn = ref(false)
+
+const getLoggedStatus = async () => {
+  isLoggedIn.value = await isAuthenticated()
+}
+
+onUnmounted(() => {
+  getLoggedStatus()
+})
 
 // Rules for Vuetify text fields
 const emailRules = [(v) => requiredValidator(v), (v) => emailValidator(v)]
