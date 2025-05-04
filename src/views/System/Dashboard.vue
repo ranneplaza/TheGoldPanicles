@@ -302,7 +302,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-          <v-btn color="primary" @click="dialog = false">Submit</v-btn>
+          <v-btn color="primary" @click="submitRequest">Submit</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -325,6 +325,34 @@ const showStaffers = ref(false)
 const drawer = ref(false)
 const fileInput = ref(null)
 const requestStatus = ref('approved')
+
+//Submit request
+const submitRequest = () => {
+  if (!title.value || !selectedDate.value) return // optional validation
+
+  requestHistory.value.push({
+    event: title.value,
+    date: selectedDate.value.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    }),
+    status: 'pending',
+    reason: '',
+  })
+
+  // Reset form fields
+  title.value = ''
+  description.value = ''
+  time.value = ''
+  selectedService.value = ''
+  contactPerson.value = ''
+  contactPhone.value = ''
+  contactGmail.value = ''
+  dialog.value = false
+}
+
+const contactPerson = ref('')
 
 // Live time/date logic
 const liveTime = ref(new Date())
@@ -438,16 +466,7 @@ const headers = [
   { text: 'Status', value: 'status' },
 ]
 
-const requestHistory = ref([
-  { event: 'Interview with Artist A', date: 'April 5, 2025', status: 'approved', reason: '' },
-  {
-    event: 'Coverage for Sportsfest',
-    date: 'April 7, 2025',
-    status: 'denied',
-    reason: 'Overlapping schedule with another request',
-  },
-  { event: 'Photography for Exhibit B', date: 'April 9, 2025', status: 'approved', reason: '' },
-])
+const requestHistory = ref([])
 
 const availableStaffers = ref([
   { name: 'Annie Batumbakal', position: 'Writer' },
