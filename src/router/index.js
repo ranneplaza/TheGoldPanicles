@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import LoginView from '@/views/Auth/LoginView.vue'
 import RegisterView from '@/views/Auth/RegisterView.vue'
-import Dashboard from '@/views/Auth/Dashboard.vue'
+import Dashboard from '@/views/System/Dashboard.vue'
 
 const routes = [
   {
