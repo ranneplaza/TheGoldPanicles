@@ -403,20 +403,20 @@ const staffMembers = ref([
   {
     id: 1,
     name: 'Annie Batumbakal',
-    phone: '0917-123-4567',
-    gmail: 'annie.batumbakal@gmail.com',
+    phone: '',
+    gmail: '',
   },
   {
     id: 2,
     name: 'Ruffamae Quinto',
-    phone: '0928-987-6543',
-    gmail: 'ruffamae.quinto@gmail.com',
+    phone: '',
+    gmail: '',
   },
   {
     id: 3,
     name: 'John Paulo Nase',
-    phone: '0906-111-2233',
-    gmail: 'jp.nase@gmail.com',
+    phone: '',
+    gmail: '',
   },
 ])
 
