@@ -1,50 +1,59 @@
 <script setup>
-import { RouterLink, useRouter } from 'vue-router'
-import { ref, computed, onUnmounted } from 'vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { formActionDefault, supabase } from '@/utils/supabase'
 import { requiredValidator, emailValidator, passwordValidator } from '@/utils/validators'
-import { isAuthenticated } from '@/utils/supabase'
-
-const email = ref('')
-const password = ref('')
-const showPassword = ref(false)
 
 const router = useRouter()
 
-const isLoggedIn = ref(false)
+// Default form state
+const formDataDefault = {
+  email: '',
+  password: '',
+}
+const formData = ref({ ...formDataDefault })
+const formAction = ref({ ...formActionDefault })
+const showPassword = ref(false)
+const formRef = ref()
 
-const getLoggedStatus = async () => {
-  isLoggedIn.value = await isAuthenticated()
+// Validation rules
+const emailRules = [
+  (v) => !!v || 'Email is required',
+  (v) => emailValidator(v) || 'Invalid email format',
+]
+
+const passwordRules = [
+  (v) => !!v || 'Password is required',
+  (v) => passwordValidator(v) || 'Password must be at least 6 characters',
+]
+
+// Submit logic
+const onSubmit = async () => {
+  formAction.value = { ...formActionDefault }
+  formAction.value.formProcess = true
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: formData.value.email,
+    password: formData.value.password,
+  })
+
+  if (error) {
+    formAction.value.formErrorMessage = error.message
+    formAction.value.formStatus = error.status
+  } else if (data) {
+    formAction.value.formSuccessMessage = 'Successfully Logged In.'
+    router.replace('/dashboard')
+  }
+
+  formRef.value?.reset()
+  formAction.value.formProcess = false
 }
 
-onUnmounted(() => {
-  getLoggedStatus()
-})
-
-// Rules for Vuetify text fields
-const emailRules = [(v) => requiredValidator(v), (v) => emailValidator(v)]
-const passwordRules = [(v) => requiredValidator(v), (v) => passwordValidator(v)]
-
-// Form reference
-const formRef = ref(null)
-
-// Enable button only when inputs are filled and valid
-const isFormValid = computed(() => {
-  return (
-    requiredValidator(email.value) === true &&
-    emailValidator(email.value) === true &&
-    requiredValidator(password.value) === true &&
-    passwordValidator(password.value) === true
-  )
-})
-
-// Handle login
+// Validate and handle form submit
 const handleLogin = () => {
-  if (formRef.value?.validate()) {
-    console.log('Logging in with', email.value, password.value)
-    router.push('/dashboard')
-  } else {
-    alert('Please fill in valid credentials.')
-  }
+  formRef.value?.validate().then(({ valid }) => {
+    if (valid) onSubmit()
+  })
 }
 </script>
 
@@ -52,20 +61,17 @@ const handleLogin = () => {
   <div>
     <v-responsive class="rounded">
       <v-app>
-        <!-- Top bar -->
+        <!-- App Bar -->
         <v-app-bar class="px-3 transparent-bar" flat elevation="0">
           <v-spacer></v-spacer>
         </v-app-bar>
 
+        <!-- Main content -->
         <v-main class="login-background">
           <v-container>
             <v-row>
-              <!-- Left Column -->
-              <v-col cols="6">
-                <!-- Optional content -->
-              </v-col>
+              <v-col cols="6"><!-- Optional content --></v-col>
 
-              <!-- Right Column (Login Card) -->
               <v-col cols="6">
                 <v-container>
                   <v-row justify="center" align="center">
@@ -76,7 +82,7 @@ const handleLogin = () => {
                           src="/img/tgp_logo.jpg"
                           height="70"
                           width="70"
-                          class="my-4 mx-auto rounded-circle"
+                          class="my-4 mx-auto"
                           style="border-radius: 50%"
                           cover
                         ></v-img>
@@ -89,7 +95,7 @@ const handleLogin = () => {
                             @submit.prevent="handleLogin"
                           >
                             <v-text-field
-                              v-model="email"
+                              v-model="formData.email"
                               label="Email"
                               color="amber-darken-2"
                               variant="solo-filled"
@@ -99,7 +105,7 @@ const handleLogin = () => {
                             ></v-text-field>
 
                             <v-text-field
-                              v-model="password"
+                              v-model="formData.password"
                               :type="showPassword ? 'text' : 'password'"
                               label="Password"
                               color="amber-darken-2"
@@ -117,7 +123,7 @@ const handleLogin = () => {
                               block
                               color="amber-darken-2"
                               variant="flat"
-                              :disabled="!isFormValid"
+                              :loading="formAction.formProcess"
                             >
                               Login
                             </v-btn>

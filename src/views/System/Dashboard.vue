@@ -27,9 +27,34 @@
         />
       </v-toolbar-title>
       <v-spacer />
-      <v-btn icon @click="drawer = !drawer" class="bg-black rounded-circle">
-        <v-icon color="#FFD700">mdi-account</v-icon>
-      </v-btn>
+      <v-menu min-width="200px">
+        <template v-slot:activator="{ props }">
+          <v-btn icon v-bind="props">
+            <v-avatar color="brown" size="large">
+              <span class="text-h5">{{ user.initials }}</span>
+            </v-avatar>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-text>
+            <div class="mx-auto text-center">
+              <v-avatar color="brown">
+                <span class="text-h5">{{ user.initials }}</span>
+              </v-avatar>
+              <h3>{{ user.fullName }}</h3>
+              <p class="text-caption mt-1">
+                {{ user.email }}
+              </p>
+              <v-divider class="my-3"></v-divider>
+              <v-btn variant="text" rounded> Edit Profile </v-btn>
+              <v-divider class="my-3"></v-divider>
+              <RouterLink to="/" style="text-decoration: none">
+                <v-btn variant="text" rounded> Logout </v-btn>
+              </RouterLink>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-menu>
     </v-app-bar>
 
     <v-main class="calendar-background" style="min-height: 100vh; overflow: hidden">
@@ -249,27 +274,17 @@
             <v-textarea label="Description" v-model="description" />
 
             <v-select
-              v-model="selectedPerson"
-              :items="staffMembers"
-              item-title="name"
-              item-value="id"
-              label="Contact Person"
+              v-model="selectedService"
+              :items="services"
+              label="Service Needed"
               class="mt-4"
             />
 
-            <v-text-field
-              v-if="selectedPerson"
-              label="Phone Number"
-              v-model="contactPhone"
-              class="mt-4"
-            />
+            <v-text-field label="Contact Person" v-model="contactPerson" class="mt-4" />
 
-            <v-text-field
-              v-if="selectedPerson"
-              label="Gmail Address"
-              v-model="contactGmail"
-              class="mt-4"
-            />
+            <v-text-field label="Phone Number" v-model="contactPhone" class="mt-4" />
+
+            <v-text-field label="Gmail Address" v-model="contactGmail" class="mt-4" />
 
             <div class="d-flex align-center mt-4">
               <v-icon @click="triggerFileUpload" class="me-2 cursor-pointer" color="black"
@@ -399,26 +414,10 @@ const description = ref('')
 const selectedPerson = ref(null)
 const contactPhone = ref('')
 const contactGmail = ref('')
-const staffMembers = ref([
-  {
-    id: 1,
-    name: 'Annie Batumbakal',
-    phone: '',
-    gmail: '',
-  },
-  {
-    id: 2,
-    name: 'Ruffamae Quinto',
-    phone: '',
-    gmail: '',
-  },
-  {
-    id: 3,
-    name: 'John Paulo Nase',
-    phone: '',
-    gmail: '',
-  },
-])
+const staffMembers = ref('')
+
+const selectedService = ref('')
+const services = ['Photography', 'Videography', 'Layout', 'Writing', 'Editing']
 
 import { watch } from 'vue'
 
@@ -460,6 +459,12 @@ const unavailableStaffers = ref([
   { name: 'Stellvester Ajero', position: 'Videographer' },
   { name: 'Rico Blanco', position: 'Layout Artist' },
 ])
+
+const user = {
+  initials: 'JD',
+  fullName: 'John Doe',
+  email: 'john.doe@doe.com',
+}
 </script>
 
 <style scoped>

@@ -49,7 +49,7 @@ const onSubmit = async () => {
     console.log(data)
     formAction.value.formSuccessMessage = 'Successfully Registered Account'
     refVForm.value?.reset()
-    router.push('/dashboard') // Redirect only if signup succeeded
+    router.replace('/dashboard') // Redirect only if signup succeeded
   }
 
   formAction.value.formProcess = false
