@@ -480,9 +480,9 @@ const unavailableStaffers = ref([
 ])
 
 const user = {
-  initials: 'JD',
-  fullName: 'John Doe',
-  email: 'john.doe@doe.com',
+  initials: 'RP',
+  fullName: 'Ranne Plaza',
+  email: 'ranneplaza@gmail.com',
 }
 </script>
 
