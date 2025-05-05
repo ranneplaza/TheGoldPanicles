@@ -1,318 +1,3 @@
-<template>
-  <v-app>
-    <v-navigation-drawer v-model="drawer" app temporary>
-      <v-list>
-        <v-list-item>
-          <v-list-item-title>Edit Profile</v-list-item-title>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Settings</v-list-item-title>
-        </v-list-item>
-        <RouterLink to="/">
-          <v-list-item>
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item>
-        </RouterLink>
-      </v-list>
-    </v-navigation-drawer>
-
-    <v-app-bar flat elevation="0" class="bg-gold text-black">
-      <v-toolbar-title class="text-black d-flex align-center">
-        <v-img
-          src="/img/tgp_logo.jpg"
-          alt="Logo"
-          height="40"
-          width="40"
-          class="mr-2 rounded-circle"
-        />
-      </v-toolbar-title>
-      <v-spacer />
-      <v-menu min-width="200px">
-        <template v-slot:activator="{ props }">
-          <v-btn icon v-bind="props">
-            <v-avatar color="brown" size="large">
-              <span class="text-h5">{{ user.initials }}</span>
-            </v-avatar>
-          </v-btn>
-        </template>
-        <v-card>
-          <v-card-text>
-            <div class="mx-auto text-center">
-              <v-avatar color="brown">
-                <span class="text-h5">{{ user.initials }}</span>
-              </v-avatar>
-              <h3>{{ user.fullName }}</h3>
-              <p class="text-caption mt-1">
-                {{ user.email }}
-              </p>
-              <v-divider class="my-3"></v-divider>
-              <v-btn variant="text" rounded> Edit Profile </v-btn>
-              <v-divider class="my-3"></v-divider>
-              <RouterLink to="/" style="text-decoration: none">
-                <v-btn variant="text" rounded> Logout </v-btn>
-              </RouterLink>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-menu>
-    </v-app-bar>
-
-    <v-main class="calendar-background" style="min-height: 100vh; overflow: hidden">
-      <v-container>
-        <v-row no-gutters>
-          <v-col cols="8">
-            <v-sheet elevation="1" class="ma-4 pa-4 calendar-sheet">
-              <v-row align="center" justify="center" class="mb-4">
-                <v-icon class="cursor-pointer px-2 mt-6" @click="prevMonth"
-                  >mdi-chevron-left</v-icon
-                >
-                <span class="mt-6 font-weight-medium">{{ selectedMonth }}</span>
-                <v-icon class="cursor-pointer px-2 mt-6" @click="nextMonth"
-                  >mdi-chevron-right</v-icon
-                >
-              </v-row>
-
-              <v-row class="justify-center mb-2">
-                <v-col class="d-flex align-center" cols="auto">
-                  <div
-                    style="
-                      width: 16px;
-                      height: 16px;
-                      background-color: #d4edaf;
-                      border-radius: 4px;
-                      margin-right: 8px;
-                    "
-                  ></div>
-                  <span class="text-caption">Available</span>
-                </v-col>
-                <v-col class="d-flex align-center" cols="auto">
-                  <div
-                    style="
-                      width: 16px;
-                      height: 16px;
-                      background-color: #f8caca;
-                      border-radius: 4px;
-                      margin-right: 8px;
-                    "
-                  ></div>
-                  <span class="text-caption">Unavailable</span>
-                </v-col>
-                <v-col class="d-flex align-center" cols="auto">
-                  <div
-                    style="
-                      width: 16px;
-                      height: 16px;
-                      background-color: #ffffff;
-                      border: 1px solid #ccc;
-                      border-radius: 4px;
-                      margin-right: 8px;
-                    "
-                  ></div>
-                  <span class="text-caption">Holiday</span>
-                </v-col>
-              </v-row>
-
-              <v-row class="text-center font-weight-bold" no-gutters>
-                <v-col
-                  v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
-                  :key="day"
-                  class="py-2"
-                >
-                  {{ day }}
-                </v-col>
-              </v-row>
-
-              <v-row v-for="(week, i) in calendar" :key="i" class="text-center" no-gutters>
-                <v-col
-                  v-for="(day, j) in week"
-                  :key="`${i}-${j}`"
-                  class="calendar-cell"
-                  :class="[
-                    getColor(day),
-                    day && getColor(day) === 'bg-event-green' ? 'cursor-pointer' : '',
-                  ]"
-                  @click="day && openRequestForm(day)"
-                >
-                  <div class="calendar-day-number">{{ day }}</div>
-                </v-col>
-              </v-row>
-            </v-sheet>
-          </v-col>
-
-          <v-col cols="4" class="pa-4">
-            <v-card class="mb-4 pa-3 text-center gold-card translucent-card" outlined>
-              <v-card-title class="text-subtitle-2 font-weight-bold"
-                >Current Date & Time</v-card-title
-              >
-              <v-card-text class="text-body-2">
-                {{ formattedDateTime }}
-              </v-card-text>
-            </v-card>
-
-            <v-btn
-              block
-              class="black-btn"
-              :color="
-                requestStatus === 'approved' ? 'green' : requestStatus === 'denied' ? 'red' : 'grey'
-              "
-              variant="outlined"
-              @click="myRequestDialog = !myRequestDialog"
-            >
-              My Request
-            </v-btn>
-
-            <v-card v-if="myRequestDialog" class="mt-4 gold-card translucent-card" outlined>
-              <v-card-title class="text-subtitle-1 font-weight-medium"
-                >Request History</v-card-title
-              >
-              <v-card-text>
-                <v-data-table
-                  :headers="headers"
-                  :items="requestHistory"
-                  class="elevation-1"
-                  hide-default-footer
-                >
-                  <template #item.status="{ item }">
-                    <v-tooltip bottom v-if="item.status === 'denied'">
-                      <template #activator="{ on, attrs }">
-                        <span
-                          v-bind="attrs"
-                          v-on="on"
-                          :style="{
-                            color: item.status === 'approved' ? 'green' : 'red',
-                            cursor: 'pointer',
-                          }"
-                        >
-                          {{ item.status }}
-                        </span>
-                      </template>
-                      <span>Reason: {{ item.reason }}</span>
-                    </v-tooltip>
-                    <span v-else :style="{ color: item.status === 'approved' ? 'green' : 'grey' }">
-                      {{ item.status }}
-                    </span>
-                  </template>
-                </v-data-table>
-              </v-card-text>
-            </v-card>
-
-            <v-btn
-              block
-              class="black-btn mt-4"
-              color="indigo"
-              variant="outlined"
-              @click="showStaffers = !showStaffers"
-            >
-              Staffers
-            </v-btn>
-
-            <v-card v-if="showStaffers" class="mt-2 gold-card translucent-card" outlined>
-              <v-card-title class="text-subtitle-1 font-weight-bold">Staffers</v-card-title>
-              <v-card-text>
-                <v-list density="compact">
-                  <v-list-item v-for="(staff, i) in availableStaffers" :key="'a-' + i" class="py-2">
-                    <v-list-item-avatar size="48">
-                      <v-img
-                        :src="`/img/profiles/${staff.name.replace(/\s+/g, '_').toLowerCase()}.jpg`"
-                        alt="profile"
-                      />
-                    </v-list-item-avatar>
-                    <v-list-item-content>
-                      <v-list-item-title class="font-weight-medium">{{
-                        staff.name
-                      }}</v-list-item-title>
-                      <v-list-item-subtitle class="text-caption text-grey">{{
-                        staff.position
-                      }}</v-list-item-subtitle>
-                    </v-list-item-content>
-                    <v-list-item-action>
-                      <v-icon color="green" size="12">mdi-circle</v-icon>
-                    </v-list-item-action>
-                  </v-list-item>
-
-                  <v-divider class="my-2" />
-
-                  <v-list-item
-                    v-for="(staff, i) in unavailableStaffers"
-                    :key="'u-' + i"
-                    class="py-2"
-                  >
-                    <v-list-item-avatar size="48">
-                      <v-img
-                        :src="`/img/profiles/${staff.name.replace(/\s+/g, '_').toLowerCase()}.jpg`"
-                        alt="profile"
-                      />
-                    </v-list-item-avatar>
-                    <v-list-item-content>
-                      <v-list-item-title class="font-weight-medium">{{
-                        staff.name
-                      }}</v-list-item-title>
-                      <v-list-item-subtitle class="text-caption text-grey">{{
-                        staff.position
-                      }}</v-list-item-subtitle>
-                    </v-list-item-content>
-                    <v-list-item-action>
-                      <v-icon color="red" size="12">mdi-circle</v-icon>
-                    </v-list-item-action>
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-main>
-
-    <v-dialog v-model="dialog" max-width="400px">
-      <v-card class="rounded-lg bg-gold text-black">
-        <v-card-title class="text-h6 text-center mt-2">Request Form</v-card-title>
-        <v-card-text>
-          <v-form>
-            <v-text-field label="Date" :model-value="selectedDate?.toDateString()" readonly />
-            <v-text-field label="Time" v-model="time" />
-            <v-text-field label="Title" v-model="title" />
-            <v-textarea label="Description" v-model="description" />
-
-            <v-select
-              v-model="selectedService"
-              :items="services"
-              label="Service Needed"
-              class="mt-4"
-            />
-
-            <v-text-field label="Contact Person" v-model="contactPerson" class="mt-4" />
-
-            <v-text-field label="Phone Number" v-model="contactPhone" class="mt-4" />
-
-            <v-text-field label="Gmail Address" v-model="contactGmail" class="mt-4" />
-
-            <div class="d-flex align-center mt-4">
-              <v-icon @click="triggerFileUpload" class="me-2 cursor-pointer" color="black"
-                >mdi-paperclip</v-icon
-              >
-              <span
-                @click="triggerFileUpload"
-                class="cursor-pointer text-decoration-underline text-black"
-                >Attach file</span
-              >
-              <input ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
-            </div>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-          <v-btn color="primary" @click="submitRequest">Submit</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-footer class="d-flex justify-center text-center bg-gold text-black" border app>
-      © {{ new Date().getFullYear() }} - TGP | All Rights Reserved
-    </v-footer>
-  </v-app>
-</template>
-
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -322,7 +7,6 @@ const selectedDate = ref(null)
 const dialog = ref(false)
 const myRequestDialog = ref(false)
 const showStaffers = ref(false)
-const drawer = ref(false)
 const fileInput = ref(null)
 const requestStatus = ref('approved')
 
@@ -486,23 +170,322 @@ const user = {
 }
 </script>
 
+<template>
+  <v-app>
+
+    <v-app-bar flat color="grey-lighten-4">
+      <v-toolbar-title class="black">
+        <h3>TheGoldPanicles</h3>
+      </v-toolbar-title>
+      <v-spacer />
+
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-btn icon v-bind="props">
+            <v-avatar color="black" size="large">
+              <span class="text-h7">{{ user.initials }}</span>
+            </v-avatar>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-text>
+            <div class="mx-auto text-center">
+              <v-avatar color="black">
+                <span class="text-h7">{{ user.initials }}</span>
+              </v-avatar>
+              <h3>{{ user.fullName }}</h3>
+              <p class="text-caption mt-1">
+                {{ user.email }}
+              </p>
+              <v-divider class="my-3"></v-divider>
+              <RouterLink to="/" style="text-decoration: none">
+                <h4 class="text-black"> Logout </h4>
+              </RouterLink>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-menu>
+    </v-app-bar>
+
+    <v-main class="dashboard-background">
+      <v-container>
+        <v-row no-gutters>
+          <v-col cols="8">
+            <v-sheet elevation="1" class="ma-4 pa-4 calendar-sheet">
+              <v-row align="center" justify="center" class="mb-4">
+                <v-icon class="cursor-pointer px-2 mt-6" @click="prevMonth"
+                  >mdi-chevron-left</v-icon
+                >
+                <span class="mt-6 font-weight-bold">{{ selectedMonth }}</span>
+                <v-icon class="cursor-pointer px-2 mt-6" @click="nextMonth"
+                  >mdi-chevron-right</v-icon
+                >
+              </v-row>
+
+              <v-row class="justify-center mb-2">
+                <v-col class="d-flex align-center" cols="auto">
+                  <div
+                    style="
+                      width: 16px;
+                      height: 16px;
+                      background-color: green;
+                      border-radius: 4px;
+                      margin-right: 8px;
+                    "
+                  ></div>
+                  <span class="text-caption">Available</span>
+                </v-col>
+                <v-col class="d-flex align-center" cols="auto">
+                  <div
+                    style="
+                      width: 16px;
+                      height: 16px;
+                      background-color: #E0E0E0;
+                      border-radius: 4px;
+                      margin-right: 8px;
+                    "
+                  ></div>
+                  <span class="text-caption">Unavailable</span>
+                </v-col>
+                <v-col class="d-flex align-center" cols="auto">
+                  <div
+                    style="
+                      width: 16px;
+                      height: 16px;
+                      background-color: #D50000;
+
+                      border-radius: 4px;
+                      margin-right: 8px;
+                    "
+                  ></div>
+                  <span class="text-caption">Holiday</span>
+                </v-col>
+              </v-row>
+
+              <v-row class="text-center font-weight-bold" no-gutters>
+                <v-col
+                  v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
+                  :key="day"
+                  class="py-2"
+                >
+                  {{ day }}
+                </v-col>
+              </v-row>
+
+              <v-row v-for="(week, i) in calendar" :key="i" class="text-center" no-gutters>
+                <v-col
+                  v-for="(day, j) in week"
+                  :key="`${i}-${j}`"
+                  class="calendar-cell"
+                  :class="[
+                    getColor(day),
+                    day && getColor(day) === 'bg-event-green' ? 'cursor-pointer' : '',
+                  ]"
+                  @click="day && openRequestForm(day)"
+                >
+                  <div class="calendar-day-number">{{ day }}</div>
+                </v-col>
+              </v-row>
+            </v-sheet>
+          </v-col>
+
+          <v-col cols="4" class="pa-4">
+            <v-card class="mb-4 pa-3 text-center">
+              <v-card-title class="text-subtitle-2 font-weight-bold"
+                >Current Date & Time</v-card-title
+              >
+              <v-card-text class="text-body-2">
+                {{ formattedDateTime }}
+              </v-card-text>
+            </v-card>
+
+            <v-btn
+              block
+              class="gray-btn"
+              :color="
+                requestStatus === 'approved' ? 'green' : requestStatus === 'denied' ? 'red' : 'grey'
+              "
+
+              @click="myRequestDialog = !myRequestDialog"
+            >
+              My Request
+            </v-btn>
+
+            <v-card v-if="myRequestDialog" class="mt-4 ">
+              <v-card-title class="text-subtitle-1 font-weight-medium"
+                >Request History</v-card-title
+              >
+              <v-card-text>
+                <v-data-table
+                  :headers="headers"
+                  :items="requestHistory"
+                  class="elevation-1"
+                  hide-default-footer
+                >
+                  <template #item.status="{ item }">
+                    <v-tooltip bottom v-if="item.status === 'denied'">
+                      <template #activator="{ on, attrs }">
+                        <span
+                          v-bind="attrs"
+                          v-on="on"
+                          :style="{
+                            color: item.status === 'approved' ? 'green' : 'red',
+                            cursor: 'pointer',
+                          }"
+                        >
+                          {{ item.status }}
+                        </span>
+                      </template>
+                      <span>Reason: {{ item.reason }}</span>
+                    </v-tooltip>
+                    <span v-else :style="{ color: item.status === 'approved' ? 'green' : 'grey' }">
+                      {{ item.status }}
+                    </span>
+                  </template>
+                </v-data-table>
+              </v-card-text>
+            </v-card>
+
+            <v-btn
+              block
+              class="gray-btn mt-4"
+
+              @click="showStaffers = !showStaffers"
+            >
+              Staffers
+            </v-btn>
+
+            <v-card v-if="showStaffers" class="mt-2">
+              <v-card-title class="text-subtitle-1 font-weight-bold">Staffers</v-card-title>
+              <v-card-text>
+                <v-list density="compact">
+                  <v-list-item v-for="(staff, i) in availableStaffers" :key="'a-' + i" class="py-2">
+                    <v-list-item-avatar size="48">
+                      <v-img
+                        :src="`/img/profiles/${staff.name.replace(/\s+/g, '_').toLowerCase()}.jpg`"
+                        alt="profile"
+                      />
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-title class="font-weight-medium">{{
+                        staff.name
+                      }}</v-list-item-title>
+                      <v-list-item-subtitle class="text-caption text-grey">{{
+                        staff.position
+                      }}</v-list-item-subtitle>
+                    </v-list-item-content>
+                    <v-list-item-action>
+                      <v-icon color="green" size="12">mdi-circle</v-icon>
+                    </v-list-item-action>
+                  </v-list-item>
+
+                  <v-divider class="my-2" />
+
+                  <v-list-item
+                    v-for="(staff, i) in unavailableStaffers"
+                    :key="'u-' + i"
+                    class="py-2"
+                  >
+                    <v-list-item-avatar size="48">
+                      <v-img
+                        :src="`/img/profiles/${staff.name.replace(/\s+/g, '_').toLowerCase()}.jpg`"
+                        alt="profile"
+                      />
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-title class="font-weight-medium">{{
+                        staff.name
+                      }}</v-list-item-title>
+                      <v-list-item-subtitle class="text-caption text-grey">{{
+                        staff.position
+                      }}</v-list-item-subtitle>
+                    </v-list-item-content>
+                    <v-list-item-action>
+                      <v-icon color="red" size="12">mdi-circle</v-icon>
+                    </v-list-item-action>
+                  </v-list-item>
+                </v-list>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+
+    <v-dialog v-model="dialog" max-width="400px">
+      <v-card class="rounded-lg bg-gold text-black">
+        <v-card-title class="text-h6 text-center mt-2">Request Form</v-card-title>
+        <v-card-text>
+          <v-form>
+            <v-text-field label="Date" :model-value="selectedDate?.toDateString()" readonly />
+            <v-text-field label="Time" v-model="time" />
+            <v-text-field label="Title" v-model="title" />
+            <v-textarea label="Description" v-model="description" />
+
+            <v-select
+              v-model="selectedService"
+              :items="services"
+              label="Service Needed"
+              class="mt-2"
+            />
+
+            <v-text-field label="Contact Person" v-model="contactPerson" class="mt-2" />
+
+            <v-text-field label="Phone Number" v-model="contactPhone" class="mt-2" />
+
+            <v-text-field label="Gmail Address" v-model="contactGmail" class="mt-2" />
+
+            <div class="d-flex align-center mt-2">
+              <v-icon @click="triggerFileUpload" class="me-2 cursor-pointer" color="black"
+                >mdi-paperclip</v-icon
+              >
+              <span
+                @click="triggerFileUpload"
+                class="cursor-pointer text-decoration-underline text-black"
+                >Attach file</span
+              >
+              <input ref="fileInput" type="file" style="display: none" @change="handleFileUpload" />
+            </div>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
+          <v-btn color="primary" @click="submitRequest">Submit</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-footer class="d-flex justify-center text-center bg-grey-lighten-4 text-black"  app>
+      © {{ new Date().getFullYear() }} - TGP | All Rights Reserved
+    </v-footer>
+  </v-app>
+</template>
+
 <style scoped>
+.dashboard-background {
+  background-image: url('/public/img/duhh.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
 .calendar-sheet {
-  background-color: #fff3b0;
+  background-color: white;
   color: #000;
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .bg-event-green {
-  background-color: #d4edaf !important;
+  background-color: green !important;
   color: #0b3f00 !important;
 }
 .bg-event-red {
-  background-color: #f8caca !important;
+  background-color: #E0E0E0 !important;
   color: #5c0000 !important;
 }
 .bg-event-white {
-  background-color: #ffffff !important;
+  background-color: #D50000!important;
   color: #000000 !important;
 }
 .bg-default {
@@ -513,33 +496,28 @@ const user = {
   cursor: pointer;
 }
 .calendar-cell {
-  border: 1px solid #000;
+  border: 1px solid #F5F5F5;
   height: 100px;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 8px;
+  padding: 10px;
   position: relative;
   transition: background-color 0.3s ease;
-  border-radius: 6px;
-  background-color: #fff3b0;
+  background-color: #F5F5F5;
   color: #000;
 }
 .calendar-day-number {
   font-size: 1.1rem;
   font-weight: 600;
 }
-.black-btn {
-  background-color: #000 !important;
-  color: #ffd700 !important;
-  border: 1px solid #ffd700 !important;
+.gray-btn {
+  background-color:#E0E0E0 !important;
+  color: black!important;
 }
-.black-btn:hover {
-  background-color: #ffd700 !important;
+.gray-btn:hover {
+  background-color: whitesmoke !important;
   color: #000 !important;
 }
-.gold-card {
-  background-color: #fff3b0 !important;
-  color: #000 !important;
-}
+
 </style>

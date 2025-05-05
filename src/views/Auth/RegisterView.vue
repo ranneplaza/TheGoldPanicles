@@ -108,9 +108,8 @@ const onFormSubmit = () => {
         <v-main class="login-background">
           <v-container>
             <v-row>
-              <v-col cols="6"></v-col>
 
-              <v-col cols="6">
+              <v-col>
                 <v-container>
                   <v-row justify="center" align="center">
                     <v-col cols="12" md="8" lg="6">
@@ -218,7 +217,7 @@ const onFormSubmit = () => {
 
 <style scoped>
 .login-background {
-  background-image: url('/img/12.png');
+  background-color: black;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -236,8 +235,8 @@ const onFormSubmit = () => {
 }
 
 .translucent-card {
-  background-color: rgba(255, 255, 255, 0.8) !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
   backdrop-filter: blur(5px);
-  border-radius: 20px;
+  border-radius: 10px;
 }
 </style>

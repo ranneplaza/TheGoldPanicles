@@ -175,7 +175,7 @@ const handleLogin = () => {
 
 <style scoped>
 .login-background {
-  background-image: url('/public/img/12.png');
+  background-image: url('/public/img/bg_img.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -193,8 +193,8 @@ const handleLogin = () => {
 }
 
 .translucent-card {
-  background-color: rgba(255, 255, 255, 0.8) !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
   backdrop-filter: blur(5px);
-  border-radius: 20px;
+  border-radius: 10px;
 }
 </style>
