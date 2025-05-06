@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
+import { watch } from 'vue'
 
 const currentDate = ref(new Date())
 const selectedDate = ref(null)
@@ -9,6 +10,17 @@ const myRequestDialog = ref(false)
 const showStaffers = ref(false)
 const fileInput = ref(null)
 const requestStatus = ref('approved')
+const contactPerson = ref('')
+const time = ref('')
+const title = ref('')
+const description = ref('')
+const selectedPerson = ref(null)
+const contactPhone = ref('')
+const contactGmail = ref('')
+const staffMembers = ref('')
+const selectedService = ref('')
+const services = ['Photography', 'Videography', 'Layout', 'Writing', 'Editing']
+const requestHistory = ref([])
 
 //Submit request
 const submitRequest = () => {
@@ -36,7 +48,6 @@ const submitRequest = () => {
   dialog.value = false
 }
 
-const contactPerson = ref('')
 
 // Live time/date logic
 const liveTime = ref(new Date())
@@ -120,19 +131,6 @@ const handleFileUpload = (event) => {
   if (file) console.log('File uploaded:', file.name)
 }
 
-const time = ref('')
-const title = ref('')
-const description = ref('')
-const selectedPerson = ref(null)
-const contactPhone = ref('')
-const contactGmail = ref('')
-const staffMembers = ref('')
-
-const selectedService = ref('')
-const services = ['Photography', 'Videography', 'Layout', 'Writing', 'Editing']
-
-import { watch } from 'vue'
-
 watch(selectedPerson, (newId) => {
   const selected = staffMembers.value.find((s) => s.id === newId)
   if (selected) {
@@ -150,7 +148,6 @@ const headers = [
   { text: 'Status', value: 'status' },
 ]
 
-const requestHistory = ref([])
 
 const availableStaffers = ref([
   { name: 'Annie Batumbakal', position: 'Writer' },
@@ -164,9 +161,9 @@ const unavailableStaffers = ref([
 ])
 
 const user = {
-  initials: 'RP',
-  fullName: 'Ranne Plaza',
-  email: 'ranneplaza@gmail.com',
+  initials: 'CS',
+  fullName: 'Christian Rey Sumalinog',
+  email: 'sumalinogxtianrey@gmail.com',
 }
 </script>
 
@@ -208,7 +205,7 @@ const user = {
     </v-app-bar>
 
     <v-main class="dashboard-background">
-      <v-container>
+      <v-container fluid>
         <v-row no-gutters>
           <v-col cols="8">
             <v-sheet elevation="1" class="ma-4 pa-4 calendar-sheet">
@@ -349,7 +346,7 @@ const user = {
             <v-btn
               block
               class="gray-btn mt-4"
-
+              color="indigo"
               @click="showStaffers = !showStaffers"
             >
               Staffers
@@ -473,7 +470,7 @@ const user = {
 .calendar-sheet {
   background-color: white;
   color: #000;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .bg-event-green {

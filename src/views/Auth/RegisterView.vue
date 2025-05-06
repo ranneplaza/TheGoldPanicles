@@ -208,7 +208,7 @@ const onFormSubmit = () => {
         </v-main>
 
         <v-footer class="footer-transparent d-flex justify-center text-center" app>
-          © 2025 - TGP | All Rights Reserved
+          © {{ new Date().getFullYear() }}  TGP | All Rights Reserved
         </v-footer>
       </v-app>
     </v-responsive>
